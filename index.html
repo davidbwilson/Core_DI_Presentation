@@ -4,10 +4,10 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>Dependency Injection in ASP.NET MVC Core</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="css/theme/league.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -24,8 +24,133 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<h3>David Wilson</h3>
+					<h4>Full stack code janitor</h4>
+					<ul style="list-style-type: none">
+						<li>Twitter | <a href="https://twitter.com/_davidbwilson">@_davidbwilson</a></li>
+						<li>Blog | <a href="http://essenceofcode.com">essenceofcode.com</a></li>
+						<li>Email | <a href="mailto:dwilson@essenceofcode.com">dwilson@essenceofcode.com</a></li>
+					</ul>
+				</section>
+				<section>
+					<h3>What are we covering?</h3>
+					<ul>
+						<li>Brief introduction to dependency injection</li>
+						<li>ASP.NET Core MVC DI Features</li>
+						<li>Missing features (or why would switch the container?)</li>
+					</ul>
+				</section>
+				<section>
+					<h5>Turn this...</h5>
+						<pre><code data-trim>
+							public class CustomersController : Controller
+							{
+								private CustomerRepository _customers;
+
+								public CustomersGlueController()
+								{
+									_customers = new CustomerRepository();
+								}
+							}
+						 </code></pre>
+						 <h5>into this... </h5>
+						 <pre><code data-trim>
+							public class CustomersController : Controller
+							{
+								private ICustomerRepository _customers;
+
+								public CustomersController(ICustomerRepository customers)
+								{
+									_customers = customers;
+								}
+							}
+						</code></pre>
+				</section>
+				<section>
+					<h3>Why would I want to use Dependency Injection?</h3>
+					<ul>
+						<li>Decreased coupling</li>
+						<li>Provides testing seams</li>
+						<li>Improved object composability</li>
+						<li>Makes decomposing tasks easier for teams</li>
+						<li>It's an improvement, but like everything there are trade-offs</li>
+					</ul>
+				</section>
+				<section>
+					<h3>What is a Dependency Injection Container?</h3>
+					<ul>
+						<li>A framework that manages dependencies for your application</li>
+						<li>Wires-up the entire dependency graph for a top-level object</li>
+						<li>Manages object life times and garbage collection</li>
+						<li>Several popular options in .NET</li>
+					</ul>
+				</section>
+				<section>
+					<h3>How does ASP.NET MVC implement DI?</h3>
+					<ul>
+						<li>Built-in / light-weight container</li>
+						<li>Entire framework is built on DI</li>
+						<li>Allows injection into views (_ViewImports.cshtml for global)
+						<li>Service Locator Provided on HTTPContext (warning: use with caution)
+				</section>
+				<section>
+					<h3>What are lifetime scopes?</h3>
+					<ul>
+						<li>Determines the instance of an object used to fulfill a dependency</li>
+						<li>Available scopes in MVC:</li>
+							<ul>
+								<li><strong>Transient</strong>: Instance per dependency request</li>
+								<li><strong>Scoped</strong>: Instance per HTTP request</li>
+								<li><strong>Singleton</strong>: Instance for the application</li>
+								<li><strong>Instance</strong>: Instance for the application created at startup</li>
+							</ul>
+					</ul>
+				</section>
+				<section>
+					<h3>How do I make my registrations generic?</h3>
+					<h5>Assembly scanning allows generic registrations</h5>
+					<blockquote>dotnet add package scrutor</blockquote>
+					<pre><code data-trim>
+						services.Scan(scan => scan.FromAssemblyOf<HomeController>()
+							.AddClasses(cl => cl.Where(tname => tname.Name.EndsWith("Service")))
+							.AsImplementedInterfaces()
+							.WithTransientLifetime());
+					</code></pre>
+				</section>
+				<section>
+					<h3>Why would I replace the default MVC IoC Container?</h3>
+					<ul>
+						<li>Improved assembly scanning</li>
+						<li>Complex scoping</li>
+						<li>Registration Modules</li>
+						<li>Alternative Injection Methods</li>
+				</section>
+				<section>
+					<h3>References</h3>
+					<ul>
+						<li>Microsoft ASP.NET Core Docs
+							<a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection">https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection</a>
+							<a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/dependency-injection">https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/dependency-injection</a>
+						</li>
+						<li>Mark Seemann's Dependency Injection in .NET
+							<a href="https://www.amazon.com/Dependency-Injection-NET-Mark-Seemann/dp/1935182501">https://www.amazon.com/Dependency-Injection-NET-Mark-Seemann/dp/1935182501</a>
+				</section>
+				<section>
+					<h3>Follow-up Exercises</h3>
+					<ol>
+						<li>Extension Methods</li>
+						<ul>
+							<li>Move the registrations in the example project into an extension method on IServiceCollection
+								Extensions should be placed in Microsoft.Extensions.DependencyInjection namespace
+							</li>
+						</ul>
+						<li>Scrutor</li>
+						<ul>
+							<li>Use Scrutor to register all interfaces that end with Service</li>
+						</ul>
+					</ol>
+				</section>
 			</div>
 		</div>
 
